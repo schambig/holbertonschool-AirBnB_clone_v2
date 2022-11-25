@@ -2,7 +2,7 @@
 """ This module defines a class to manage db storage for hbnb clone """
 from sqlalchemy import create_engine, MetaData
 from os import getenv
-from logging import info
+# from logging import warning
 
 from sqlalchemy.orm import scoped_session, sessionmaker
 from models.user import User
@@ -39,16 +39,47 @@ class DBStorage:
         """ Queries a database for objects """
         dic = {}
         if cls:
+            # query on self.__session all objs depending of the class name
             # .all() method returns the result of the query as a list
             query_list = self.__session.query(cls).all()
             for elem in query_list:
                 key = "{}.{}".format(type(elem).__name__, elem.id)
                 dic[key] = elem
         else:
-            lista = [State, City, User, Place, Review, Amenity]
-            for clase in lista:
-                query = self.__session.query(clase)
+            # query all type of objects if class (cls) not exists
+            objs = [State, City, User, Place, Review, Amenity]
+            for obj in objs:
+                query = self.__session.query(obj)
                 for elem in query:
                     key = "{}.{}".format(type(elem).__name__, elem.id)
                     dic[key] = elem
+        # return format: key= <class-name>.<object-id>, value= object
         return dic
+
+    def new(self, obj):
+        """add the object to the current database session"""
+        self.__session.add(obj)
+
+    def save(self):
+        """commit all changes of the current database session"""
+        self.__session.commit()  # write changes to the database
+
+    def delete(self, obj=None):
+        """delete from the current database session obj if not None"""
+        if obj:
+            #  info('DELETING...')  # print WARNING:root:DELETING... to console
+            self.__session.delete(obj)  # mark object for deletion
+
+    def reload(self):
+        """creates all tables and database session in current database"""
+        # create all tables in the database
+        self.__session = Base.metadata.create_all(self.__engine)
+        # generate new session object self.__session from engine self.__engine
+        sess_factory = sessionmaker(bind=self.__engine, expire_on_commit=False)
+        # to make sure your Session is thread-safe
+        Session = scoped_session(sess_factory)
+        self.__session = Session()
+
+    def close(self):
+        """ close session """
+        self.__session.close()
