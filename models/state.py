@@ -9,21 +9,24 @@ import models
 from os import getenv
 
 
-class State(BaseModel, Base):
-    """ State class """
-    if models.is_db == "db":
+if getenv('HBNB_TYPE_STORAGE') == 'db':
+    class State(BaseModel, Base):
+        """ State class """
         __tablename__ = 'states'
         name = Column(String(128), nullable=False)
-        cities = relationship('City', backref='state', cascade='delete')
-    else:
+        cities = relationship('City', backref='state',
+                              cascade='all, delete, delete-orphan')
+
+else:  # File Storage
+    class State(BaseModel):
+        """ State class """
         name = ""
 
-    if models.is_db != 'db':
         @property
         def cities(self):
             cities_list = []
-            all_cities = list(models.storage.all(City).values())
-            for ct in all_cities:
-                if ct.state_id == self.id:
-                    cities_list.append(ct)
+            cities = models.storage.all(City).values()
+            for city in cities:
+                if city.state_id == self.id:
+                    cities_list.append(city)
             return cities_list
