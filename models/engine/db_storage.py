@@ -1,10 +1,12 @@
 #!/usr/bin/python3
 """ This module defines a class to manage db storage for hbnb clone """
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import (create_engine)
 from os import getenv
-# from logging import warning
+from sqlalchemy import MetaData
+# from logging import info
 
-from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm import scoped_session
+from sqlalchemy.orm import sessionmaker
 from models.user import User
 from models.place import Place
 from models.state import State
@@ -47,10 +49,12 @@ class DBStorage:
                 dic[key] = elem
         else:
             # query all type of objects if class (cls) not exists
-            objs = [State, City, User, Place, Review, Amenity]
+            objs = [State, City, User, Place, Review]
+            for i in objs:
+                print(i)
             for obj in objs:
-                query = self.__session.query(obj)
-                for elem in query:
+                quer = self.__session.query(obj)
+                for elem in quer:
                     key = "{}.{}".format(type(elem).__name__, elem.id)
                     dic[key] = elem
         # return format: key= <class-name>.<object-id>, value= object
