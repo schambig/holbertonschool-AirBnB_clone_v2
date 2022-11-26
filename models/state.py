@@ -14,8 +14,19 @@ if getenv('HBNB_TYPE_STORAGE') == 'db':
         """ State class """
         __tablename__ = 'states'
         name = Column(String(128), nullable=False)
-        cities = relationship('City', backref='state')
-else: # File Storage
+        cities = relationship('City', backref='state',
+                              cascade='all, delete, delete-orphan')
+
+else:  # File Storage
     class State(BaseModel):
-    """ State class """
-    name = ""
+        """ State class """
+        name = ""
+
+        @property
+        def cities(self):
+            cities_list = []
+            cities = models.storage.all(City).values()
+            for city in cities:
+                if city.state_id == self.id:
+                    cities_list.append(city)
+            return cities_list
