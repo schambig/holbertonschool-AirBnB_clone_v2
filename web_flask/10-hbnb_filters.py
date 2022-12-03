@@ -16,7 +16,7 @@ def display_dropdown():
     ''' Display header, footer and a filters box with dropdown '''
     states = storage.all(State).values()
     amenities = storage.all(Amenity).values()
-    return render_template('6-index.html', states=states, amenities=amenities)
+    return render_template('10-hbnb_filters.html', states=states, amenities=amenities)
 
 
 @app.teardown_appcontext
